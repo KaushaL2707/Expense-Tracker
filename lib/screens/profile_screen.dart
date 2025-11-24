@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../data/mock_data.dart';
 import 'login_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:exp/provider/theme_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -22,9 +24,7 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundImage: NetworkImage(mockUser.profilePictureUrl ??
-                        'https://i.pravatar.cc/150?img=12'),
-                    backgroundColor: AppTheme.primaryColor.withOpacity(0.2),
+                    backgroundImage: const AssetImage('assets/images/user.png'),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -64,45 +64,67 @@ class ProfileScreen extends StatelessWidget {
             // Settings Section
             Container(
               decoration: BoxDecoration(
-                color: AppTheme.surfaceColor,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.dark_mode),
-                    title: const Text('Dark Mode'),
+                    leading: Icon(Icons.dark_mode,
+                        color: Theme.of(context).iconTheme.color),
+                    title: Text(
+                      'Dark Mode',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                     trailing: Switch(
-                      value:
-                          true, // Always true for now as we only have dark theme
-                      onChanged: (value) {},
-                      activeColor: AppTheme.primaryColor,
+                      value: Provider.of<ThemeProvider>(context).isDarkMode,
+                      onChanged: (value) {
+                        Provider.of<ThemeProvider>(context, listen: false)
+                            .toggleTheme();
+                      },
+                      activeColor: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  Divider(color: Colors.grey[800], height: 1),
+                  Divider(color: Theme.of(context).dividerColor, height: 1),
                   ListTile(
-                    leading: const Icon(Icons.notifications),
-                    title: const Text('Notifications'),
-                    trailing: const Icon(Icons.chevron_right),
+                    leading: Icon(Icons.notifications,
+                        color: Theme.of(context).iconTheme.color),
+                    title: Text(
+                      'Notifications',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    trailing: Icon(Icons.chevron_right,
+                        color: Theme.of(context).iconTheme.color),
                     onTap: () {},
                   ),
-                  Divider(color: Colors.grey[800], height: 1),
+                  Divider(color: Theme.of(context).dividerColor, height: 1),
                   ListTile(
-                    leading: const Icon(Icons.security),
-                    title: const Text('Privacy & Security'),
-                    trailing: const Icon(Icons.chevron_right),
+                    leading: Icon(Icons.security,
+                        color: Theme.of(context).iconTheme.color),
+                    title: Text(
+                      'Privacy & Security',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    trailing: Icon(Icons.chevron_right,
+                        color: Theme.of(context).iconTheme.color),
                     onTap: () {},
                   ),
-                  Divider(color: Colors.grey[800], height: 1),
+                  Divider(color: Theme.of(context).dividerColor, height: 1),
                   ListTile(
-                    leading: const Icon(Icons.help),
-                    title: const Text('Help & Support'),
-                    trailing: const Icon(Icons.chevron_right),
+                    leading: Icon(Icons.help,
+                        color: Theme.of(context).iconTheme.color),
+                    title: Text(
+                      'Help & Support',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    trailing: Icon(Icons.chevron_right,
+                        color: Theme.of(context).iconTheme.color),
                     onTap: () {},
                   ),
                 ],
               ),
             ),
+
             const SizedBox(height: 32),
 
             // Logout Button

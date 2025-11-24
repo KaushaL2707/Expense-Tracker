@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../core/theme.dart';
 import '../data/mock_data.dart';
 import '../models/transaction_model.dart';
 import 'add_transaction_screen.dart';
+import 'package:exp/widgets/expense_pie_chart.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,30 +13,32 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Initialize with mock data
   final List<Transaction> _transactions = List.from(mockTransactions);
 
   void _addNewTransaction(Transaction newTransaction) {
     setState(() {
-      _transactions.insert(0, newTransaction); // Add to top of list
+      _transactions.insert(0, newTransaction);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     final double totalIncome = _transactions
         .where((t) => t.type == TransactionType.income)
         .fold(0, (sum, t) => sum + t.amount);
+
     final double totalExpense = _transactions
         .where((t) => t.type == TransactionType.expense)
         .fold(0, (sum, t) => sum + t.amount);
+
     final double balance = totalIncome - totalExpense;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
-        automaticallyImplyLeading:
-            false, // Hide back button since we have bottom nav
+        automaticallyImplyLeading: false,
       ),
       body: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.0, end: 1.0),
@@ -56,134 +58,103 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Balance Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppTheme.primaryColor,
-                      AppTheme.primaryColor.withOpacity(0.7)
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.primaryColor.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Total Balance',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '\$${balance.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildSummaryItem(
-                          context,
-                          'Income',
-                          '\$${totalIncome.toStringAsFixed(2)}',
-                          Icons.arrow_downward,
-                          Colors.greenAccent,
-                        ),
-                        _buildSummaryItem(
-                          context,
-                          'Expense',
-                          '\$${totalExpense.toStringAsFixed(2)}',
-                          Icons.arrow_upward,
-                          Colors.redAccent,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              // BALANCE CARD
+              _buildBalanceCard(context, balance, totalIncome, totalExpense),
+
               const SizedBox(height: 32),
 
-              // Pie Chart Placeholder
-              const Text('Spending Breakdown',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              // PIE CHART
+              Text(
+                'Spending Breakdown',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 16),
+
               Container(
-                height: 200,
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.surfaceColor,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Center(
-                  child: Text(
-                    'Pie Chart Placeholder\n(Add fl_chart package for real charts)',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
+                child: ExpensePieChart(transactions: _transactions),
               ),
+
               const SizedBox(height: 32),
 
-              // Recent Transactions
+              // RECENT TRANSACTIONS
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Recent Transactions',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  TextButton(onPressed: () {}, child: const Text('See All')),
+                  Text(
+                    'Recent Transactions',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  // TextButton(
+                  //   onPressed: () {},
+                  //   child: const Text('See All'),
+                  // ),
                 ],
               ),
               const SizedBox(height: 8),
+
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _transactions.length,
                 itemBuilder: (context, index) {
-                  final transaction = _transactions[index];
+                  final t = _transactions[index];
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor:
-                            transaction.type == TransactionType.income
-                                ? Colors.green.withOpacity(0.1)
-                                : Colors.red.withOpacity(0.1),
+                        backgroundColor: (t.type == TransactionType.income
+                                ? Colors.green
+                                : Colors.red)
+                            .withOpacity(0.1),
                         child: Icon(
-                          transaction.type == TransactionType.income
+                          t.type == TransactionType.income
                               ? Icons.arrow_downward
                               : Icons.arrow_upward,
-                          color: transaction.type == TransactionType.income
+                          color: t.type == TransactionType.income
                               ? Colors.green
                               : Colors.red,
                         ),
                       ),
-                      title: Text(transaction.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle:
-                          Text(DateFormat.yMMMd().format(transaction.date)),
+                      title: Text(
+                        t.title,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            DateFormat.yMMMd().format(t.date),
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          if (t.notes != null && t.notes!.isNotEmpty)
+                            Text(
+                              t.notes!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.textTheme.bodySmall!.color!
+                                    .withOpacity(0.7),
+                              ),
+                            ),
+                        ],
+                      ),
                       trailing: Text(
-                        '${transaction.type == TransactionType.income ? '+' : '-'} \$${transaction.amount.toStringAsFixed(2)}',
+                        '${t.type == TransactionType.income ? '+' : '-'} \$${t.amount.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: transaction.type == TransactionType.income
+                          color: t.type == TransactionType.income
                               ? Colors.green
                               : Colors.red,
                           fontSize: 16,
@@ -197,27 +168,25 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+
+      // FAB
       floatingActionButton: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.0, end: 1.0),
         duration: const Duration(milliseconds: 800),
         curve: Curves.elasticOut,
         builder: (context, value, child) {
-          return Transform.scale(
-            scale: value,
-            child: child,
-          );
+          return Transform.scale(scale: value, child: child);
         },
         child: FloatingActionButton(
           onPressed: () async {
             final newTransaction = await Navigator.push<Transaction>(
               context,
               MaterialPageRoute(
-                  builder: (context) => const AddTransactionScreen()),
+                builder: (context) => const AddTransactionScreen(),
+              ),
             );
 
-            if (newTransaction != null) {
-              _addNewTransaction(newTransaction);
-            }
+            if (newTransaction != null) _addNewTransaction(newTransaction);
           },
           child: const Icon(Icons.add),
         ),
@@ -225,16 +194,72 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSummaryItem(BuildContext context, String label, String amount,
-      IconData icon, Color color) {
+  // BALANCE CARD
+  Widget _buildBalanceCard(
+      BuildContext context, double balance, double income, double expense) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            theme.colorScheme.primary,
+            theme.colorScheme.primary.withOpacity(0.7),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Total Balance',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: Colors.white70,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '\$${balance.toStringAsFixed(2)}',
+            style: theme.textTheme.displayMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildSummaryItem(
+                  'Income', income, Icons.arrow_downward, Colors.greenAccent),
+              _buildSummaryItem(
+                  'Expense', expense, Icons.arrow_upward, Colors.redAccent),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem(
+      String label, double amount, IconData icon, Color color) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
-            shape: BoxShape.circle,
-          ),
+              color: color.withOpacity(0.2), shape: BoxShape.circle),
           child: Icon(icon, color: color, size: 20),
         ),
         const SizedBox(width: 12),
@@ -243,11 +268,13 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Text(label,
                 style: const TextStyle(color: Colors.white70, fontSize: 12)),
-            Text(amount,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16)),
+            Text(
+              '\$${amount.toStringAsFixed(2)}',
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+            ),
           ],
         ),
       ],

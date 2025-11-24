@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../core/theme.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
@@ -10,12 +9,14 @@ class BudgetScreen extends StatefulWidget {
 
 class _BudgetScreenState extends State<BudgetScreen> {
   double _budgetLimit = 2000.0;
-  double _currentSpending = 1250.0; // Mock data for now
-  bool _pushNotifications = true;
+  double _currentSpending = 1250.0; // TODO: replace with actual monthly sum
+  bool _pushNotifications = false;
   bool _emailAlerts = false;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     final double progress = (_currentSpending / _budgetLimit).clamp(0.0, 1.0);
     final bool isOverBudget = _currentSpending > _budgetLimit;
 
@@ -24,25 +25,25 @@ class _BudgetScreenState extends State<BudgetScreen> {
         title: const Text('Budget & Alerts'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Budget Overview Card
+            // ======================= BUDGET OVERVIEW CARD =======================
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.surfaceColor,
+                color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: isOverBudget
-                      ? Colors.redAccent.withOpacity(0.5)
+                      ? theme.colorScheme.error.withOpacity(0.5)
                       : Colors.transparent,
                   width: 2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: theme.shadowColor.withOpacity(0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -51,143 +52,176 @@ class _BudgetScreenState extends State<BudgetScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Monthly Budget',
-                        style: TextStyle(fontSize: 16, color: Colors.white70),
-                      ),
-                      Icon(
-                        Icons.account_balance_wallet,
-                        color: AppTheme.primaryColor,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '\$${_budgetLimit.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  LinearProgressIndicator(
-                    value: progress,
-                    backgroundColor: Colors.grey[800],
-                    color: isOverBudget ? Colors.red : AppTheme.primaryColor,
-                    minHeight: 8,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  const SizedBox(height: 12),
+                  // HEADER
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Spent: \$${_currentSpending.toStringAsFixed(0)}',
-                        style: TextStyle(
-                          color:
-                              isOverBudget ? Colors.redAccent : Colors.white70,
+                        'Monthly Budget',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
                           fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Icon(Icons.account_balance_wallet,
+                          color: theme.colorScheme.primary),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // BUDGET AMOUNT
+                  Text(
+                    '\₹${_budgetLimit.toStringAsFixed(0)}',
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // PROGRESS BAR
+                  LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 10,
+                    backgroundColor: theme.dividerColor.withOpacity(0.2),
+                    color: isOverBudget
+                        ? theme.colorScheme.error
+                        : theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // SPENT + PERCENT
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Spent: \₹${_currentSpending.toStringAsFixed(0)}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: isOverBudget
+                              ? theme.colorScheme.error
+                              : theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
                       ),
                       Text(
                         '${(progress * 100).toStringAsFixed(1)}%',
-                        style: const TextStyle(color: Colors.white70),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        ),
                       ),
                     ],
                   ),
+
+                  const SizedBox(height: 8),
+
+                  if (!isOverBudget)
+                    Text(
+                      'Remaining: \₹${(_budgetLimit - _currentSpending).toStringAsFixed(0)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      ),
+                    ),
                 ],
               ),
             ),
+
             const SizedBox(height: 32),
 
-            // Set Budget Section
-            const Text(
+            // ======================= SET BUDGET SECTION =======================
+            Text(
               'Set Budget Limit',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
+
             const SizedBox(height: 16),
+
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.surfaceColor,
+                color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('\$0'),
-                      Text(
-                        '\$${_budgetLimit.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor,
-                        ),
-                      ),
-                      const Text('\$5000+'),
-                    ],
+                  Text(
+                    "Enter Monthly Budget",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    ),
                   ),
-                  Slider(
-                    value: _budgetLimit,
-                    min: 0,
-                    max: 5000,
-                    divisions: 50,
-                    label: _budgetLimit.round().toString(),
-                    activeColor: AppTheme.primaryColor,
-                    onChanged: (double value) {
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    initialValue: _budgetLimit.toStringAsFixed(0),
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      prefixText: "₹ ",
+                      filled: true,
+                      fillColor:
+                          theme.colorScheme.surfaceVariant.withOpacity(0.2),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      hintText: "Enter amount",
+                    ),
+                    onChanged: (value) {
                       setState(() {
-                        _budgetLimit = value;
+                        _budgetLimit = double.tryParse(value) ?? _budgetLimit;
                       });
                     },
                   ),
                 ],
               ),
             ),
+
             const SizedBox(height: 32),
 
-            // Alerts Section
-            const Text(
+            // ======================= ALERTS SECTION =======================
+            Text(
               'Alerts',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
+
             const SizedBox(height: 16),
+
             Container(
               decoration: BoxDecoration(
-                color: AppTheme.surfaceColor,
+                color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
                 children: [
                   SwitchListTile(
                     title: const Text('Push Notifications'),
-                    subtitle:
-                        const Text('Get notified when you near your limit'),
+                    subtitle: const Text(
+                        'Get notified when nearing your budget limit'),
                     value: _pushNotifications,
-                    activeColor: AppTheme.primaryColor,
-                    secondary: const Icon(Icons.notifications_active),
                     onChanged: (bool value) {
                       setState(() {
                         _pushNotifications = value;
                       });
                     },
+                    activeColor: theme.colorScheme.primary,
+                    secondary: const Icon(Icons.notifications_active),
                   ),
-                  Divider(color: Colors.grey[800], height: 1),
+                  Divider(color: theme.dividerColor, height: 1),
                   SwitchListTile(
                     title: const Text('Email Alerts'),
                     subtitle: const Text('Receive weekly summary emails'),
                     value: _emailAlerts,
-                    activeColor: AppTheme.primaryColor,
-                    secondary: const Icon(Icons.email),
                     onChanged: (bool value) {
                       setState(() {
                         _emailAlerts = value;
                       });
                     },
+                    activeColor: theme.colorScheme.primary,
+                    secondary: const Icon(Icons.email),
                   ),
                 ],
               ),

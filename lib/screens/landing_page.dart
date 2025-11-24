@@ -1,3 +1,4 @@
+import 'package:exp/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import 'main_screen.dart';
@@ -70,7 +71,7 @@ class LandingPage extends StatelessWidget {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const MainScreen()),
+                            builder: (context) => const LoginScreen()),
                       );
                     },
                     child: const Text('Get Started'),

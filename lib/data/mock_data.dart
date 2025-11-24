@@ -3,9 +3,9 @@ import '../models/user_model.dart';
 
 final User mockUser = User(
   id: 'u1',
-  name: 'Alex Doe',
-  email: 'alex.doe@example.com',
-  profilePictureUrl: 'https://i.pravatar.cc/150?img=11',
+  name: 'Anonymous User',
+  email: 'anonymous@example.com',
+  profilePictureUrl: 'https://i.pravatar.cc/150?u=anon',
 );
 
 final List<Transaction> mockTransactions = [
