@@ -1,14 +1,13 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import '../models/transaction_model.dart';
 
 class MonthlyCategoryBarChart extends StatelessWidget {
-  final List<Transaction> transactions;
+  final Map<String, double> categoryBreakdown;
   final String selectedMonth;
 
   const MonthlyCategoryBarChart({
     super.key,
-    required this.transactions,
+    required this.categoryBreakdown,
     required this.selectedMonth,
   });
 
@@ -29,19 +28,9 @@ class MonthlyCategoryBarChart extends StatelessWidget {
       'Other': Colors.grey,
     };
 
-    // Month number
-    final monthIndex =
-        DateTime.parse("2025-${_monthNumber(selectedMonth)}-01").month;
-
     // SUM EXPENSE BY CATEGORY FOR SELECTED MONTH
-    final Map<String, double> categoryTotals = {};
-
-    for (var t in transactions) {
-      if (t.type == TransactionType.expense && t.date.month == monthIndex) {
-        categoryTotals[t.category] =
-            (categoryTotals[t.category] ?? 0) + t.amount;
-      }
-    }
+    // We now receive the breakdown directly
+    final Map<String, double> categoryTotals = categoryBreakdown;
 
     if (categoryTotals.isEmpty) {
       return Center(
@@ -135,7 +124,7 @@ class MonthlyCategoryBarChart extends StatelessWidget {
                         children: [
                           SizedBox(height: 260 - barHeight),
                           Text(
-                            "\$${amount.toStringAsFixed(0)}",
+                            "\₹${amount.toStringAsFixed(0)}",
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -151,23 +140,5 @@ class MonthlyCategoryBarChart extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _monthNumber(String name) {
-    final months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December"
-    ];
-    return (months.indexOf(name) + 1).toString().padLeft(2, '0');
   }
 }

@@ -1,13 +1,31 @@
 class User {
-  final String id;
+  final int id;
   final String name;
   final String email;
-  final String? profilePictureUrl;
+  final String token;
 
   User({
     required this.id,
     required this.name,
     required this.email,
-    this.profilePictureUrl,
+    required this.token,
   });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['userId'] ?? json['id'],
+      name: json['name'],
+      email: json['email'],
+      token: json['token'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': id,
+      'name': name,
+      'email': email,
+      'token': token,
+    };
+  }
 }

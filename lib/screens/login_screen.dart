@@ -1,5 +1,8 @@
 import 'package:exp/screens/main_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,11 +14,11 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLogin = true;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
       body: Center(
@@ -25,14 +28,10 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Title
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: Text(
-                  _isLogin ? 'Welcome Back!' : 'Create Account',
-                  key: ValueKey(_isLogin),
-                  style: theme.textTheme.displayMedium,
-                  textAlign: TextAlign.center,
-                ),
+              Text(
+                'Welcome Back!',
+                style: theme.textTheme.displayMedium,
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
 
@@ -59,53 +58,58 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 24),
 
               // Login / Signup Button
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MainScreen(),
-                    ),
-                  );
-                },
-                child: Text(_isLogin ? 'Login' : 'Sign Up'),
-              ),
-              const SizedBox(height: 16),
-
-              // Guest Access
-              OutlinedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MainScreen(),
-                    ),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+              // Login Button
+              if (userProvider.isLoading)
+                const Center(child: CircularProgressIndicator())
+              else
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      await userProvider.login(
+                        _emailController.text,
+                        _passwordController.text,
+                      );
+                      if (mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MainScreen(),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Login failed: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Login'),
                 ),
-                child: const Text('Continue as Guest'),
-              ),
               const SizedBox(height: 24),
 
-              // Switch login/signup
+              // Switch to Signup
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    _isLogin
-                        ? "Don't have an account? "
-                        : "Already have an account? ",
+                    "Don't have an account? ",
                     style: theme.textTheme.bodyMedium,
                   ),
                   TextButton(
                     onPressed: () {
-                      setState(() {
-                        _isLogin = !_isLogin;
-                      });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpScreen(),
+                        ),
+                      );
                     },
-                    child: Text(_isLogin ? 'Sign Up' : 'Login'),
+                    child: const Text('Sign Up'),
                   ),
                 ],
               ),

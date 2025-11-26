@@ -5,7 +5,9 @@ import '../models/transaction_model.dart';
 import '../core/theme.dart';
 
 class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+  final Transaction? transactionToEdit;
+
+  const AddTransactionScreen({super.key, this.transactionToEdit});
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
@@ -34,6 +36,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.transactionToEdit != null) {
+      final t = widget.transactionToEdit!;
+      _titleController.text = t.title;
+      _amountController.text = t.amount.toString();
+      _notesController.text = t.notes ?? '';
+      _selectedDate = t.date;
+      _selectedType = t.type;
+      _selectedCategory = t.category;
+    }
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _amountController.dispose();
@@ -51,7 +67,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       }
 
       final newTransaction = Transaction(
-        id: const Uuid().v4(),
+        id: widget.transactionToEdit?.id ?? const Uuid().v4(),
         title: enteredTitle,
         amount: enteredAmount,
         date: _selectedDate,
@@ -85,7 +101,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Transaction'),
+        title: Text(widget.transactionToEdit == null
+            ? 'Add Transaction'
+            : 'Edit Transaction'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

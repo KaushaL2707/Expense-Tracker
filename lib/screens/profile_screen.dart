@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
-import '../data/mock_data.dart';
-import 'login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:exp/provider/theme_provider.dart';
+import '../providers/user_provider.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final user = userProvider.user;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile & Settings'),
@@ -28,7 +31,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    mockUser.name,
+                    user?.name ?? 'Guest User',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -36,26 +39,26 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    mockUser.email,
+                    user?.email ?? '',
                     style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 16,
                     ),
                   ),
                   const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Edit Profile Logic
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: const Text('Edit Profile'),
-                  ),
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //     // Edit Profile Logic
+                  //   },
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: AppTheme.primaryColor,
+                  //     foregroundColor: Colors.white,
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(20),
+                  //     ),
+                  //   ),
+                  //   child: const Text('Edit Profile'),
+                  // ),
                 ],
               ),
             ),
@@ -85,42 +88,42 @@ class ProfileScreen extends StatelessWidget {
                       activeColor: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  Divider(color: Theme.of(context).dividerColor, height: 1),
-                  ListTile(
-                    leading: Icon(Icons.notifications,
-                        color: Theme.of(context).iconTheme.color),
-                    title: Text(
-                      'Notifications',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    trailing: Icon(Icons.chevron_right,
-                        color: Theme.of(context).iconTheme.color),
-                    onTap: () {},
-                  ),
-                  Divider(color: Theme.of(context).dividerColor, height: 1),
-                  ListTile(
-                    leading: Icon(Icons.security,
-                        color: Theme.of(context).iconTheme.color),
-                    title: Text(
-                      'Privacy & Security',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    trailing: Icon(Icons.chevron_right,
-                        color: Theme.of(context).iconTheme.color),
-                    onTap: () {},
-                  ),
-                  Divider(color: Theme.of(context).dividerColor, height: 1),
-                  ListTile(
-                    leading: Icon(Icons.help,
-                        color: Theme.of(context).iconTheme.color),
-                    title: Text(
-                      'Help & Support',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    trailing: Icon(Icons.chevron_right,
-                        color: Theme.of(context).iconTheme.color),
-                    onTap: () {},
-                  ),
+                  //Divider(color: Theme.of(context).dividerColor, height: 1),
+                  // ListTile(
+                  //   leading: Icon(Icons.notifications,
+                  //       color: Theme.of(context).iconTheme.color),
+                  //   title: Text(
+                  //     'Notifications',
+                  //     style: Theme.of(context).textTheme.bodyLarge,
+                  //   ),
+                  //   trailing: Icon(Icons.chevron_right,
+                  //       color: Theme.of(context).iconTheme.color),
+                  //   onTap: () {},
+                  // ),
+                  // Divider(color: Theme.of(context).dividerColor, height: 1),
+                  // ListTile(
+                  //   leading: Icon(Icons.security,
+                  //       color: Theme.of(context).iconTheme.color),
+                  //   title: Text(
+                  //     'Privacy & Security',
+                  //     style: Theme.of(context).textTheme.bodyLarge,
+                  //   ),
+                  //   trailing: Icon(Icons.chevron_right,
+                  //       color: Theme.of(context).iconTheme.color),
+                  //   onTap: () {},
+                  // ),
+                  // Divider(color: Theme.of(context).dividerColor, height: 1),
+                  // ListTile(
+                  //   leading: Icon(Icons.help,
+                  //       color: Theme.of(context).iconTheme.color),
+                  //   title: Text(
+                  //     'Help & Support',
+                  //     style: Theme.of(context).textTheme.bodyLarge,
+                  //   ),
+                  //   trailing: Icon(Icons.chevron_right,
+                  //       color: Theme.of(context).iconTheme.color),
+                  //   onTap: () {},
+                  // ),
                 ],
               ),
             ),
@@ -131,13 +134,16 @@ class ProfileScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: TextButton.icon(
-                onPressed: () {
-                  // Navigate back to Login Screen
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                        builder: (context) => const LoginScreen()),
-                    (route) => false,
-                  );
+                onPressed: () async {
+                  await userProvider.logout();
+                  if (context.mounted) {
+                    // Navigate back to Login Screen (AuthWrapper will handle it, but we can push replacement to be sure)
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (context) => const LoginScreen()),
+                      (route) => false,
+                    );
+                  }
                 },
                 icon: const Icon(Icons.logout, color: Colors.redAccent),
                 label: const Text(

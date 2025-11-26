@@ -2,10 +2,10 @@ import '../models/transaction_model.dart';
 import '../models/user_model.dart';
 
 final User mockUser = User(
-  id: 'u1',
+  id: 1,
   name: 'Anonymous User',
   email: 'anonymous@example.com',
-  profilePictureUrl: 'https://i.pravatar.cc/150?u=anon',
+  token: 'mock-token',
 );
 
 final List<Transaction> mockTransactions = [

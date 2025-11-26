@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:exp/widgets/monthly_category_chart.dart';
-import '../data/mock_data.dart';
-import '../models/transaction_model.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../services/transaction_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -14,18 +17,81 @@ class ReportsScreen extends StatefulWidget {
 
 class _ReportsScreenState extends State<ReportsScreen> {
   String _selectedMonth = DateFormat('MMMM').format(DateTime.now());
-  final List<Transaction> _transactions = List.from(mockTransactions);
-
   final List<String> months = List.generate(
     12,
     (i) => DateFormat('MMMM').format(
-      DateTime(2025, i + 1),
+      DateTime(DateTime.now().year, i + 1),
     ),
   );
 
-  // TODO: Replace with real data from your transaction list
-  double mockIncome = 1200;
-  double mockExpense = 650;
+  final TransactionService _transactionService = TransactionService();
+  Map<String, dynamic>? _analyticsData;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAnalytics();
+  }
+
+  Future<void> _fetchAnalytics() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      // TODO: Get actual userId
+      // Convert month name to YYYY-MM format
+      final now = DateTime.now();
+      final monthIndex = months.indexOf(_selectedMonth) + 1;
+      final formattedMonth =
+          '${now.year}-${monthIndex.toString().padLeft(2, '0')}';
+
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (userProvider.user == null) return;
+
+      print('Fetching analytics for: $formattedMonth');
+      final data = await _transactionService.getAnalytics(
+          userProvider.user!.id, formattedMonth);
+      const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+      print('Analytics Data for $_selectedMonth:');
+      print(encoder.convert(data));
+      setState(() {
+        _analyticsData = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error fetching analytics: $e');
+      // Handle error
+    }
+  }
+
+  Future<void> _exportData(String type) async {
+    if (type == 'csv') {
+      final now = DateTime.now();
+      final monthIndex = months.indexOf(_selectedMonth) + 1;
+      final formattedMonth =
+          '${now.year}-${monthIndex.toString().padLeft(2, '0')}';
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (userProvider.user == null) return;
+
+      final url = _transactionService.getExportUrl(
+          userProvider.user!.id, formattedMonth);
+      if (await canLaunchUrl(Uri.parse(url))) {
+        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch export URL')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('PDF Export coming soon!')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +140,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     setState(() {
                       _selectedMonth = value!;
                     });
+                    _fetchAnalytics();
                   },
                 ),
               ),
@@ -82,62 +149,66 @@ class _ReportsScreenState extends State<ReportsScreen> {
             const SizedBox(height: 24),
 
             // Bar Chart Section
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: SizedBox(
-                height: 320, // matches chart internal height
-                child: MonthlyCategoryBarChart(
-                  transactions: _transactions,
-                  selectedMonth: _selectedMonth,
+            if (_isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (_analyticsData != null)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: SizedBox(
+                  height: 320, // matches chart internal height
+                  child: MonthlyCategoryBarChart(
+                    categoryBreakdown: Map<String, double>.from(
+                        _analyticsData!['categoryBreakdown'] ?? {}),
+                    selectedMonth: _selectedMonth,
+                  ),
                 ),
               ),
-            ),
 
             const SizedBox(height: 32),
 
             // EXPORT SECTION
-            Text(
-              "Export Data",
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
+            // Text(
+            //   "Export Data",
+            //   style: theme.textTheme.titleLarge?.copyWith(
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
 
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.picture_as_pdf),
-                    label: const Text("PDF Report"),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor:
-                          theme.colorScheme.errorContainer.withOpacity(0.4),
-                      foregroundColor: theme.colorScheme.error,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.table_chart),
-                    label: const Text("CSV Export"),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.green.withOpacity(0.2),
-                      foregroundColor: Colors.green,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       child: ElevatedButton.icon(
+            //         onPressed: () {},
+            //         icon: const Icon(Icons.picture_as_pdf),
+            //         label: const Text("PDF Report"),
+            //         style: ElevatedButton.styleFrom(
+            //           padding: const EdgeInsets.symmetric(vertical: 16),
+            //           backgroundColor:
+            //               theme.colorScheme.errorContainer.withOpacity(0.4),
+            //           foregroundColor: theme.colorScheme.error,
+            //         ),
+            //       ),
+            //     ),
+            //     const SizedBox(width: 16),
+            //     Expanded(
+            //       child: ElevatedButton.icon(
+            //         onPressed: () => _exportData('csv'),
+            //         icon: const Icon(Icons.table_chart),
+            //         label: const Text("CSV Export"),
+            //         style: ElevatedButton.styleFrom(
+            //           padding: const EdgeInsets.symmetric(vertical: 16),
+            //           backgroundColor: Colors.green.withOpacity(0.2),
+            //           foregroundColor: Colors.green,
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // ),
           ],
         ),
       ),
