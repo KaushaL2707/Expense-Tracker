@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 
 class AuthService {
-  static const String baseUrl = 'https://c849642d9914.ngrok-free.app';
+  static const String baseUrl = 'https://expense-tracker-backend-1-qixp.onrender.com';
 
   Future<User> login(String email, String password) async {
     final url = Uri.parse('$baseUrl/api/auth/login');

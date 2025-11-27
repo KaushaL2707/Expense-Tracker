@@ -5,7 +5,7 @@ import '../models/budget_model.dart';
 
 class TransactionService {
   static const String baseUrl =
-      'https://c849642d9914.ngrok-free.app'; // Replace with your backend URL
+      'https://expense-tracker-backend-1-qixp.onrender.com'; // Replace with your backend URL
 
   Future<List<Transaction>> getTransactions(int userId) async {
     final url = Uri.parse('$baseUrl/api/transactions/$userId');
