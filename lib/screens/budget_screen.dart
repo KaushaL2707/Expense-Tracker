@@ -147,7 +147,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
                         // BUDGET AMOUNT
                         Text(
-                          '\₹${_budgetLimit.toStringAsFixed(0)}',
+                          '\$${_budgetLimit.toStringAsFixed(0)}',
                           style: theme.textTheme.displaySmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -173,7 +173,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Spent: \₹${_currentSpending.toStringAsFixed(0)}',
+                              'Spent: \$${_currentSpending.toStringAsFixed(0)}',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: isOverBudget
                                     ? theme.colorScheme.error
@@ -195,7 +195,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
                         if (!isOverBudget)
                           Text(
-                            'Remaining: \₹${(_budgetLimit - _currentSpending).toStringAsFixed(0)}',
+                            'Remaining: \$${(_budgetLimit - _currentSpending).toStringAsFixed(0)}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color:
                                   theme.colorScheme.onSurface.withOpacity(0.5),
@@ -237,7 +237,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           initialValue: _budgetLimit.toStringAsFixed(0),
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            prefixText: "₹ ",
+                            prefixText: "\$ ",
                             filled: true,
                             fillColor: theme.colorScheme.surfaceVariant
                                 .withOpacity(0.2),

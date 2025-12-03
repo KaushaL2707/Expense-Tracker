@@ -124,7 +124,7 @@ class MonthlyCategoryBarChart extends StatelessWidget {
                         children: [
                           SizedBox(height: 260 - barHeight),
                           Text(
-                            "\₹${amount.toStringAsFixed(0)}",
+                            "\$${amount.toStringAsFixed(0)}",
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),

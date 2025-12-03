@@ -326,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ],
                                   ),
                                   trailing: Text(
-                                    '${t.type == TransactionType.income ? '+' : '-'} \₹${t.amount.toStringAsFixed(2)}',
+                                    '${t.type == TransactionType.income ? '+' : '-'} \$${t.amount.toStringAsFixed(2)}',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: t.type == TransactionType.income
@@ -407,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '\₹${balance.toStringAsFixed(2)}',
+            '\$${balance.toStringAsFixed(2)}',
             style: theme.textTheme.displayMedium?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -445,7 +445,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(label,
                 style: const TextStyle(color: Colors.white70, fontSize: 12)),
             Text(
-              '\₹${amount.toStringAsFixed(2)}',
+              '\$${amount.toStringAsFixed(2)}',
               style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
